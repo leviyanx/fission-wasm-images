@@ -7,7 +7,7 @@ FROM ubuntu:20.04
 
 # install rust
 RUN apt-get update \
-    && apt-get install -y build-essential curl \
+    && apt-get install -y build-essential curl vim\
     && curl https://sh.rustup.rs -sSf | bash -s -- -y
 
 ENV PATH="/root/.cargo/bin:${PATH}"
@@ -18,4 +18,3 @@ RUN rustup toolchain install nightly \
 
 ## Fission builder specific section
 ADD build.sh /usr/local/bin/build
-EXPOSE 8001
