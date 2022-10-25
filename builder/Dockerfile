@@ -10,9 +10,6 @@ FROM rust:${RUST_BASE_IMG}
 RUN rustup toolchain install nightly \
     && rustup target add wasm32-wasi
 
-# Add example (rust code)
-ADD cli /root/cli
-
 ## Fission builder specific section
 COPY --from=0 /builder /builder
 ADD build.sh /usr/local/bin/build
