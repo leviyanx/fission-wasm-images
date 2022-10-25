@@ -1,24 +1,30 @@
-FROM golang:1.16-alpine
+FROM ubuntu:20.04 AS base
+WORKDIR /
+RUN apt update && apt install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /wasm
-COPY *.go /wasm/
+# wasm runtime environment
+# WasmEdge from https://github.com/WasmEdge/WasmEdge/releases
+COPY ./WasmEdge /root/.wasmedge
+ENV PATH="/root/.wasmedge/bin:${PATH}"
 
-# link for server
-RUN go mod init github.com/leviyanx/wasm
+## compile server
+FROM golang:latest AS builder
+
+ENV GOPATH /usr
+ENV APP    ${GOPATH}/src/github.com/leviyanx/wasm
+
+WORKDIR ${APP}
+
+COPY *.go ${APP}
+
+RUN go mod init
 RUN go mod tidy
+RUN go build -o server . && cp server /
 
-RUN go build -o server .
+## setup server
+FROM base
+COPY hello.wasm /root/hello/
+COPY --from=builder /server /
 
-FROM alpine:3.14
-
-WORKDIR /app
-
-RUN apk update
-RUN apk add --no-cache coreutils binutils findutils grep curl git bash
-# Add wasmedge (wasm runtime)
-RUN curl -sSf https://gitee.com/leviyanx/WasmEdge/raw/master/utils/install.sh | bash
-
-COPY --from=0 /wasm/server /app/server
-
+ENTRYPOINT ["/server"]
 EXPOSE 8888
-ENTRYPOINT ["./server"]
