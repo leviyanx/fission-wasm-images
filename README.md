@@ -10,10 +10,14 @@ To build the runtime environment:
 docker build -f Dockerfile . -t ${user}/wasm-env:${tag}
 ```
 
-env image dockerfile: `WasmEdge` folder is from https://github.com/WasmEdge/WasmEdge/releases
+(`WasmEdge` folder is from https://github.com/WasmEdge/WasmEdge/releases)
 
 To build the builder environment:
 
 ```bash
 cd builder/ && docker build -f Dockerfile . -t ${user}/wasm-builder:${tag}
 ```
+
+## Reference
+
+The rust-code in example dir is from https://github.com/second-state/wasm-learning.
