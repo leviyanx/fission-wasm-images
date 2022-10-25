@@ -1,24 +1,24 @@
-## Build rust environment
-FROM ubuntu:20.04
+FROM golang:1.16-alpine
 
-## configure builder environment
-# install rust
-RUN apt-get update \
-    && apt-get install -y build-essential curl vim git\
-    && curl https://sh.rustup.rs -sSf | bash -s -- -y
+WORKDIR /wasm
+COPY *.go /wasm/
 
-ENV PATH="/root/.cargo/bin:${PATH}"
+# link for server
+RUN go mod init github.com/leviyanx/wasm
+RUN go mod tidy
 
-# Add build environment (wasm32)
-RUN rustup toolchain install nightly \
-    && rustup target add wasm32-wasi
+RUN go build -o server .
 
-## configure runtime environement
+FROM alpine:3.14
+
+WORKDIR /app
+
+RUN apk update
+RUN apk add --no-cache coreutils binutils findutils grep curl git bash
 # Add wasmedge (wasm runtime)
 RUN curl -sSf https://gitee.com/leviyanx/WasmEdge/raw/master/utils/install.sh | bash
 
-# Add example (rust code)
-ADD cli /root/cli
+COPY --from=0 /wasm/server /app/server
 
-## Fission builder specific section
-ADD build.sh /usr/local/bin/build
+EXPOSE 8888
+ENTRYPOINT ["./server"]
