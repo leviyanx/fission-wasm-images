@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -97,10 +98,22 @@ func (bs *BinaryServer) SpecializeHandler(w http.ResponseWriter, r *http.Request
 		HttpResponseWithError(w, http.StatusBadRequest, fmt.Errorf("failed to stat file: %w", err))
 		return
 	}
-	if !fileStat.Mode().IsRegular() {
-		HttpResponseWithError(w, http.StatusBadRequest, fmt.Errorf("file is not a regular file: %s", codePath))
-		return
+
+	if fileStat.IsDir() {
+		files, err := ioutil.ReadDir(codePath)
+		if err != nil {
+			HttpResponseWithError(w, http.StatusBadRequest, fmt.Errorf("error reading directory: %w", err))
+			return
+		}
+		if len(files) == 0 {
+			HttpResponseWithError(w, http.StatusBadRequest, fmt.Errorf("failed to stat file: %v", codePath))
+			return
+		}
+		fi := files[0]
+		codePath = filepath.Join(codePath, fi.Name())
 	}
+
+	log.Printf("loading file from %v", codePath)
 	// Future: Check if executable is correct architecture/executable.
 
 	// Copy the executable to ensure that file is executable and immutable.
