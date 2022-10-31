@@ -9,37 +9,32 @@ deploy and run function from single webassembly file
 ```bash
 # create the environment 
 $ fission environment create --name wasm --image leviyanx/wasm-env:v1.6
-
 poolsize setting default to 3
 environment 'wasm' created
 
 # create function
 $ fission function create --name hello-wasm --env wasm --code hello.wasm
-
 Package 'hello-wasm-f50ac152-a849-4079-9dc0-8a8e8edb0a53' created
 function 'hello-wasm' created
 
-# run function
+# run the function
 $ fission function test --name hello-wasm
-
 hello
 ```
  
 ### hello project
 
-compile rust to webassembly, and deploy and run function from package
+compile rust to webassembly, deploy and run function from the deploy archive
 
 ```bash
 # create the environment 
 $ fission environment create --name wasm --image leviyanx/wasm-env:v1.6 --builder leviyanx/wasm-builder:v1.30
-
 poolsize setting default to 3
 environment 'wasm' created
 
 # create the function
 $ cd rust-code
 $ fission function create --name hello-wasm --env wasm --src hello
-
 Package 'hello-wasm-d8770ae6-38bb-4d13-974e-cd27ca67a27b' created
 function 'hello-wasm' created
 
@@ -49,8 +44,7 @@ NAME                                            BUILD_STATUS ENV  LASTUPDATEDAT
 hello-wasm-d8770ae6-38bb-4d13-974e-cd27ca67a27b succeeded    wasm 31 Oct 22 22:44 CST
 
 # view the building log
-fission pkg info --name hello-wasm-d8770ae6-38bb-4d13-974e-cd27ca67a27b                                               
-
+$ fission pkg info --name hello-wasm-d8770ae6-38bb-4d13-974e-cd27ca67a27b                                               
 Name:        hello-wasm-d8770ae6-38bb-4d13-974e-cd27ca67a27b
 Environment: wasm
 Status:      succeeded
@@ -65,7 +59,6 @@ start building
 ...
 
 # run the function
-fission function test --name hello-wasm
-
+$ fission function test --name hello-wasm
 hello
 ```

@@ -2,6 +2,8 @@
 
 ## Usage
 
+Refer to README in the example directory.
+
 ## Compiling
 
 To build the runtime environment:
