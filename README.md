@@ -1,4 +1,4 @@
-# WASM Environment Example
+# Fission: WebAssembly Environement
 
 ## Usage
 
@@ -20,4 +20,4 @@ cd builder/ && docker build -f Dockerfile . -t ${user}/wasm-builder:${tag}
 
 ## Reference
 
-The rust-code in example dir is from https://github.com/second-state/wasm-learning.
+The rust-code in example directory comes from https://github.com/second-state/wasm-learning.
