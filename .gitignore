@@ -1,6 +1,5 @@
-
+.idea
 WasmEdge
-hello.wasm
 fission-dump
 
 .DS_Store
