@@ -26,7 +26,7 @@ const (
 var specialized bool
 
 type (
-	BinaryServer struct {
+	WasmServer struct {
 		fetchedCodePath  string
 		internalCodePath string
 	}
@@ -62,7 +62,7 @@ func HttpResponseWithError(w http.ResponseWriter, status int, err error) {
 	HttpResponse(w, status, []byte(err.Error()))
 }
 
-func (bs *BinaryServer) SpecializeHandler(w http.ResponseWriter, r *http.Request) {
+func (ws *WasmServer) SpecializeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Starting Specialize request")
 	if specialized {
 		HttpResponseWithError(w, http.StatusBadRequest, fmt.Errorf("already specialized"))
@@ -77,7 +77,7 @@ func (bs *BinaryServer) SpecializeHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	log.Printf("Decoded function load request: %#v\n", request)
-	codePath := bs.fetchedCodePath
+	codePath := ws.fetchedCodePath
 
 	if request.FilePath != "" {
 		fileStat, err := os.Stat(request.FilePath)
@@ -122,18 +122,18 @@ func (bs *BinaryServer) SpecializeHandler(w http.ResponseWriter, r *http.Request
 		HttpResponseWithError(w, http.StatusBadRequest, fmt.Errorf("failed to read file: %w", err))
 		return
 	}
-	err = os.WriteFile(bs.internalCodePath, userFunc, 0555)
+	err = os.WriteFile(ws.internalCodePath, userFunc, 0555)
 	if err != nil {
 		HttpResponseWithError(w, http.StatusBadRequest, fmt.Errorf("failed to write file: %w", err))
 		return
 	}
-	bs.internalCodePath = codePath
-	log.Printf("BinaryServer: %#v\n", bs)
+	ws.internalCodePath = codePath
+	log.Printf("WasmServer: %#v\n", ws)
 	specialized = true
 	log.Println("done specializing")
 }
 
-func (bs *BinaryServer) InvocationHandler(w http.ResponseWriter, r *http.Request) {
+func (ws *WasmServer) InvocationHandler(w http.ResponseWriter, r *http.Request) {
 	if !specialized {
 		HttpResponseWithError(w, http.StatusBadRequest, fmt.Errorf("not specialized"))
 		return
@@ -152,7 +152,7 @@ func (bs *BinaryServer) InvocationHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	// Future: could be improved by keeping subprocess open while environment is specialized
-	cmd := exec.Command("wasmedge", bs.internalCodePath)
+	cmd := exec.Command("wasmedge", ws.internalCodePath)
 	cmd.Env = execEnv.ToStringEnv()
 
 	stdinPipe, err := cmd.StdinPipe()
@@ -263,8 +263,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	server := &BinaryServer{*codePath, absInternalCodePath}
-	log.Printf("BinaryServer: %#v\n", server)
+	server := &WasmServer{*codePath, absInternalCodePath}
+	log.Printf("WasmServer: %#v\n", server)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", server.InvocationHandler)
