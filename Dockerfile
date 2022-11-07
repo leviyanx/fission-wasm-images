@@ -24,8 +24,6 @@ RUN go build -o server . && cp server /
 ## setup server
 FROM base
 COPY --from=builder /server /
-# add example
-COPY hello.wasm /root/hello/
 
 ENTRYPOINT ["/server"]
 EXPOSE 8888
